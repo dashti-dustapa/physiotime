@@ -783,7 +783,8 @@
       from { opacity: 0; }
       to { opacity: 1; }
     }
-  </style>
+        </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -1160,14 +1161,16 @@
     };
 
     // Load from LocalStorage
-    let state = JSON.parse(localStorage.getItem("physiotime_data_v3")) || DEFAULT_DATA;
+    const db = supabase.createClient("https://vvwnlauuquirhspzldop.supabase.co", "sb_publishable_8YsnwJvx-yA_Spp3Xiyrng_k_Q7QY8G");
+let state = JSON.parse(JSON.stringify(DEFAULT_DATA));
     if (!state.history) state.history = [];
 
-    function saveData() {
-      localStorage.setItem("physiotime_data_v3", JSON.stringify(state));
-      renderBoard();
-    }
-
+    async function saveData() {
+  localStorage.setItem("physiotime_data_v3", JSON.stringify(state));
+  renderBoard();
+  const { error } = await db.from("app_state").update({ data: state }).eq("id", 1);
+  if (error) console.error("Supabase save error:", error);
+}
     // ====== PIN Authentication ======
     function verifyPin() {
       const input = document.getElementById("pin-input").value;
@@ -1726,7 +1729,14 @@
     }
 
     // Initialize
-    renderBoard();
+    async function init() {
+  const { data, error } = await db.from("app_state").select("data").eq("id", 1).single();
+  if (error) console.error("Supabase load error:", error);
+  else if (data && data.data && Object.keys(data.data).length) state = data.data;
+  if (!state.history) state.history = [];
+  renderBoard();
+}
+init();
   </script>
 </body>
 </html>
