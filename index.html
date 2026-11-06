@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Physiotime Star System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;700;800&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #f7f9fb;
+      --card-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --gold-star: #eab308;
+      --red-star: #ef4444;
+      --border-color: #e5e7eb;
+      --line-color: #e2e8f0;
+      --shadow: 0 4px 15px -1px rgba(0, 0, 0, 0.07), 0 2px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Vazirmatn', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* ====== Lock Screen ====== */
+    #lock-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 20px;
+      backdrop-filter: blur(8px);
+    }
+
+    .lock-card {
+      background: white;
+      border-radius: 20px;
+      padding: 35px 30px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
+      animation: popIn 0.3s ease-out;
+    }
+
+    .lock-card h2 {
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+      color: #0f172a;
+    }
+
+    .lock-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+
+    .pin-input {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 1.2rem;
+      text-align: center;
+      letter-spacing: 2px;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      margin-bottom: 15px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .pin-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn {
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 18px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid #cbd5e1;
+      color: #334155;
+    }
+
+    .btn-outline:hover {
+      background: #f1f5f9;
+    }
+
+    .btn-admin {
+      background: #3b82f6;
+      color: white;
+      padding: 7px 15px;
+      font-size: 0.9rem;
+    }
+
+    .btn-history {
+      background: #8b5cf6;
+      color: white;
+      padding: 7px 15px;
+      font-size: 0.9rem;
+    }
+    .btn-history:hover { background: #7c3aed; }
+
+    .btn-print {
+      background: #10b981;
+      color: white;
+      padding: 12px 24px;
+      font-size: 1rem;
+    }
+    .btn-print:hover { background: #059669; }
+
+    .error-msg {
+      color: #dc2626;
+      font-size: 0.85rem;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* ====== Main Notebook Board Container ====== */
+    .board-container {
+      width: 100%;
+      max-width: 920px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .top-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 22px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border-color);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .site-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .top-action-buttons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .notebook-header {
+      text-align: center;
+      padding: 26px 20px 18px;
+      border-bottom: 2px dashed #e2e8f0;
+      background: #fff;
+    }
+
+    .main-title {
+      font-family: 'Caveat', 'Vazirmatn', cursive;
+      font-size: 3.2rem;
+      font-weight: 700;
+      color: #111827;
+      letter-spacing: 0.5px;
+      position: relative;
+      display: inline-block;
+      direction: ltr;
+    }
+
+    .title-highlight {
+      position: absolute;
+      bottom: -6px;
+      left: -10%;
+      width: 120%;
+      height: 7px;
+      background: #facc15;
+      border-radius: 20px;
+      opacity: 0.85;
+      z-index: 1;
+    }
+
+    .main-content {
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
+      background: 
+        repeating-linear-gradient(
+          to bottom,
+          #ffffff,
+          #ffffff 39px,
+          var(--line-color) 40px
+        );
+      line-height: 40px;
+    }
+
+    /* Room Block */
+    .room-block {
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 14px;
+      border: 1px solid #edf2f7;
+      padding: 18px 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .room-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      direction: ltr;
+    }
+
+    .room-name {
+      font-family: 'Caveat', 'Vazirmatn', cursive;
+      font-size: 2.1rem;
+      font-weight: 700;
+      color: #2e7d32;
+    }
+
+    .stars-display {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .star-red {
+      color: var(--red-star);
+      font-size: 1.8rem;
+    }
+
+    .star-yellow {
+      color: var(--gold-star);
+      font-size: 1.5rem;
+    }
+
+    .no-rating {
+      font-family: 'Caveat', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--red-star);
+    }
+
+    /* Staff List */
+    .staff-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .staff-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 16px;
+      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #f1f5f9;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      direction: ltr;
+    }
+
+    .staff-row:hover {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      transform: translateX(4px);
+    }
+
+    .staff-info-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .staff-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #3b82f6);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+    }
+
+    .staff-name {
+      font-family: 'Caveat', 'Vazirmatn', cursive;
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: #1d4ed8;
+    }
+
+    /* Rules Section */
+    .rules-card {
+      background: #fafaf9;
+      border-radius: 16px;
+      border: 2px dashed #d6d3d1;
+      padding: 24px;
+      margin-top: 10px;
+    }
+
+    .rules-title {
+      font-family: 'Caveat', 'Vazirmatn', cursive;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #1c1917;
+      margin-bottom: 12px;
+      direction: ltr;
+    }
+
+    .rules-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .rules-list li {
+      font-size: 1.05rem;
+      color: #292524;
+      line-height: 1.6;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .rules-list li::before {
+      content: "•";
+      font-size: 1.6rem;
+      color: #f59e0b;
+      line-height: 1;
+    }
+
+    /* ====== Modals ====== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(5px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 5000;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      position: relative;
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: #f1f5f9;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+    }
+
+    .modal-close-btn:hover { background: #e2e8f0; color: #0f172a; }
+
+    /* Staff Detail View */
+    .detail-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .detail-avatar-large {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: white;
+      font-size: 2.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+    }
+
+    .detail-name {
+      font-size: 2.3rem;
+      font-weight: 800;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+
+    .detail-stars {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      font-size: 2.2rem;
+      color: var(--gold-star);
+      margin-bottom: 10px;
+    }
+
+    .detail-room-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      background: #dcfce7;
+      color: #15803d;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    /* Change Rank Card inside Staff Modal */
+    .quick-rank-card {
+      background: #fffbeb;
+      border: 1.5px solid #fde68a;
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 18px;
+      text-align: center;
+    }
+
+    .quick-rank-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 8px;
+    }
+
+    .star-buttons-container {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .btn-star-select {
+      background: white;
+      border: 1.5px solid #fcd34d;
+      border-radius: 10px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #78350f;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+
+    .btn-star-select:hover {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      transform: translateY(-2px);
+    }
+
+    .detail-reason-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 18px;
+      margin-top: 15px;
+      text-align: right;
+    }
+
+    .detail-reason-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .detail-reason-text {
+      font-size: 1.1rem;
+      color: #0f172a;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    /* ====== Prompt / Modal for "Why change rank?" ====== */
+    #reason-prompt-modal {
+      z-index: 6000;
+    }
+
+    .reason-prompt-card {
+      background: white;
+      border-radius: 20px;
+      max-width: 520px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+      text-align: right;
+    }
+
+    .prompt-stars-comparison {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin: 16px 0;
+      padding: 12px;
+      background: #f8fafc;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    /* History Table & Cards */
+    .history-item {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+
+    .history-item:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .history-name {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-date {
+      font-size: 0.85rem;
+      color: #64748b;
+      direction: ltr;
+    }
+
+    .history-badge {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .badge-rank-up { background: #dcfce7; color: #15803d; }
+    .badge-rank-down { background: #fee2e2; color: #b91c1c; }
+    .badge-rank-same { background: #f1f5f9; color: #475569; }
+
+    .history-reason-box {
+      background: #f8fafc;
+      border-right: 4px solid #8b5cf6;
+      padding: 8px 12px;
+      border-radius: 4px 8px 8px 4px;
+      font-size: 0.95rem;
+      color: #334155;
+      line-height: 1.6;
+    }
+
+    /* Admin Tabs */
+    .admin-nav-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+    }
+
+    .tab-btn {
+      background: #f1f5f9;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #475569;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .admin-section {
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .admin-section h3 {
+      font-size: 1.2rem;
+      color: #0f172a;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+      text-align: right;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      outline: none;
+      direction: rtl;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .admin-table th, .admin-table td {
+      padding: 10px;
+      border-bottom: 1px solid #f1f5f9;
+      text-align: right;
+      font-size: 0.9rem;
+    }
+
+    .action-btn {
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-inline-end: 4px;
+    }
+
+    .action-edit { background: #e0e7ff; color: #4338ca; }
+    .action-edit:hover { background: #c7d2fe; }
+
+    .action-del { background: #fee2e2; color: #ef4444; }
+    .action-del:hover { background: #fecaca; }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: white !important;
+        padding: 0 !important;
+      }
+      #lock-screen,
+      .top-controls,
+      .modal-overlay,
+      .no-print {
+        display: none !important;
+      }
+      .board-container {
+        border: none !important;
+        box-shadow: none !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      .main-title {
+        font-size: 2.8rem !important;
+      }
+      .room-block {
+        break-inside: avoid;
+        box-shadow: none !important;
+        border: 1.5px solid #cbd5e1 !important;
+        margin-bottom: 16px !important;
+      }
+      .staff-row {
+        border: 1px solid #e2e8f0 !important;
+      }
+      .rules-card {
+        break-inside: avoid;
+        border: 1.5px solid #94a3b8 !important;
+        background: #fdfdfd !important;
+      }
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Lock Screen (PIN) -->
+  <div id="lock-screen">
+    <div class="lock-card">
+      <div style="font-size: 3rem; margin-bottom: 10px;">🔒</div>
+      <h2>داخڵکردنی کۆدی نهێنی</h2>
+      <p>تکایە کۆدی تایبەتی سەنتەر (PIN) بنووسە بۆ کردنەوەی سیستەم</p>
+      
+      <input type="password" id="pin-input" class="pin-input" placeholder="کۆدی PIN بنووسە..." autofocus>
+      <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="verifyPin()">کردنەوەی سیستەم</button>
+      <div id="pin-error" class="error-msg">کۆدەکە هەڵەیە! تکایە دووبارەی بکەرەوە.</div>
+    </div>
+  </div>
+
+  <!-- Main Board Container -->
+  <div class="board-container">
+    
+    <!-- Top Action Bar -->
+    <div class="top-controls no-print">
+      <div class="site-brand">
+        <span>⭐</span>
+        <span>Physiotime Performance Dashboard</span>
+      </div>
+      <div class="top-action-buttons">
+        <button class="btn btn-history" onclick="openHistoryModal()">
+          <span>📜 دەفتەری مێژوو (History)</span>
+        </button>
+        <button class="btn btn-admin" onclick="openAdminModal()">
+          <span>⚙️ Super Admin</span>
+        </button>
+        <button class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem;" onclick="lockWebsite()">
+          <span>قوفڵکردن 🔒</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Notebook Header -->
+    <div class="notebook-header">
+      <div class="main-title">
+        <span id="site-title-text">Physiotime Star system</span>
+        <div class="title-highlight"></div>
+      </div>
+    </div>
+
+    <!-- Main Content (Rooms & Staff) -->
+    <div class="main-content" id="rooms-container">
+      <!-- Generated via JavaScript -->
+    </div>
+
+    <!-- Rules Section -->
+    <div style="padding: 0 30px 30px;">
+      <div class="rules-card">
+        <div class="rules-title">Star rules :</div>
+        <ul class="rules-list" id="rules-list-container">
+          <!-- Loaded from state -->
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Staff Member Detail Popup -->
+  <div class="modal-overlay" id="staff-modal">
+    <div class="modal-content">
+      <button class="modal-close-btn" onclick="closeModal('staff-modal')">✕</button>
+      
+      <div class="detail-header">
+        <div class="detail-avatar-large" id="modal-staff-avatar">A</div>
+        <div class="detail-name" id="modal-staff-name">Staff Name</div>
+        <div class="detail-stars" id="modal-staff-stars">★★★★★</div>
+        <span class="detail-room-badge" id="modal-staff-room">Female Room</span>
+      </div>
+
+      <!-- Quick Change Yellow Star Controls -->
+      <div class="quick-rank-card">
+        <div class="quick-rank-title">⭐ گۆڕینی ئەستێرە زەردەکان (زیادکردن یان کەمکردن):</div>
+        <p style="font-size: 0.85rem; color: #a16207; margin-bottom: 8px;">
+          کلیک لە هەر ئەستێرەیەک بکە، پەنجەرەی پرسیار دەکرێتەوە و هۆکاری گۆڕانکارییەکە دەپرسێت
+        </p>
+        <div class="star-buttons-container">
+          <button class="btn-star-select" onclick="triggerStarChangePrompt(5)">★★★★★ (5)</button>
+          <button class="btn-star-select" onclick="triggerStarChangePrompt(4)">★★★★☆ (4)</button>
+          <button class="btn-star-select" onclick="triggerStarChangePrompt(3)">★★★☆☆ (3)</button>
+          <button class="btn-star-select" onclick="triggerStarChangePrompt(2)">★★☆☆☆ (2)</button>
+          <button class="btn-star-select" onclick="triggerStarChangePrompt(1)">★☆☆☆☆ (1)</button>
+          <button class="btn-star-select" style="color: #b91c1c; border-color: #fca5a5;" onclick="triggerStarChangePrompt(0)">بێ ئەستێرە (0 / N.R)</button>
+        </div>
+      </div>
+
+      <div class="detail-reason-box">
+        <div class="detail-reason-title">
+          <span>📝</span>
+          <span>دواین هۆکاری تۆمارکراو بۆ ئەم ئەستێرانە:</span>
+        </div>
+        <div class="detail-reason-text" id="modal-staff-reason">
+          هیچ تێبینییەک تۆمار نەکراوە.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROMPT POPUP: "Why are you changing his/her rank?" -->
+  <div class="modal-overlay" id="reason-prompt-modal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div style="text-align: center; margin-bottom: 14px;">
+        <span style="font-size: 2.8rem;">⭐ ➔ 📝</span>
+        <h2 style="font-size: 1.5rem; color: #0f172a; margin-top: 6px;">بۆچی دەتەوێت ئەستێرەکانی بگۆڕیت؟</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+          تکایە هۆکاری گۆڕانکارییەکە بنووسە بۆ ئەوەی لە دەفتەری مێژوو پاشەکەوت بێت
+        </p>
+      </div>
+
+      <div class="prompt-stars-comparison">
+        <div style="text-align: center;">
+          <div style="font-size: 0.8rem; color: #64748b;">ئەستێرەی ئێستا</div>
+          <div id="prompt-old-stars" style="color: var(--gold-star);">★★★★★</div>
+        </div>
+        <div style="font-size: 1.5rem; color: #94a3b8;">➔</div>
+        <div style="text-align: center;">
+          <div style="font-size: 0.8rem; color: #64748b;">ئەستێرەی نوێ</div>
+          <div id="prompt-new-stars" style="color: var(--gold-star);">★★★★☆</div>
+        </div>
+      </div>
+
+      <form onsubmit="handleConfirmStarChange(event)">
+        <div class="form-group">
+          <label for="prompt-reason-input" style="font-weight: 700;">
+            هۆکاری ئەم گۆڕانکارییە بنووسە (Why did you change his/her rank?):
+          </label>
+          <textarea 
+            id="prompt-reason-input" 
+            class="form-control" 
+            rows="3" 
+            placeholder="بۆچی ئەستێرەت زیاد کرد یاخود کەم کرد؟ (وەک: چالاکیی نەخۆش، کەمبوونەوەی پابەندی، سوپاسی نەخۆش...)" 
+            required autofocus></textarea>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 15px;">
+          <button type="submit" class="btn btn-primary" style="flex: 1; padding: 12px;">پاشەکەوتکردن لە مێژوو ✅</button>
+          <button type="button" class="btn btn-outline" onclick="closeModal('reason-prompt-modal')">پاشگەزبوونەوە</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dedicated History Modal -->
+  <div class="modal-overlay" id="history-modal">
+    <div class="modal-content" style="max-width: 720px;">
+      <button class="modal-close-btn" onclick="closeModal('history-modal')">✕</button>
+      
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="font-size: 1.8rem; color: #1e293b; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <span>📜</span>
+          <span>دەفتەری مێژووی پلەبەندییەکان (Rank History)</span>
+        </h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+          هەموو ئەو کاتانەی کە ئەستێرەکان زیادکراون، کەمکراون، لەگەڵ ڕێکەوت، کات، و هۆکارەکەی
+        </p>
+      </div>
+
+      <!-- History filter or clear -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">
+        <span id="history-count-badge" style="font-weight: 700; color: #475569; font-size: 0.95rem;">کۆی تۆمارەکان: 0</span>
+        <button class="btn btn-outline" style="font-size: 0.8rem; padding: 4px 10px; color: #ef4444;" onclick="clearHistoryLog()">
+          سڕینەوەی هەموو مێژوو 🗑️
+        </button>
+      </div>
+
+      <!-- History List Container -->
+      <div id="history-list-container" style="max-height: 480px; overflow-y: auto;">
+        <!-- Dynamically injected -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Super Admin Modal -->
+  <div class="modal-overlay" id="admin-modal">
+    <div class="modal-content" style="max-width: 680px;">
+      <button class="modal-close-btn" onclick="closeModal('admin-modal')">✕</button>
+      
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="font-size: 1.8rem; color: #1e293b;">🛠️ کۆنترۆڵ پەنێڵی Super Admin</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">دەستکاریکردنی ژوورەکان، ئەستێرەکان، کارمەندەکان و تێبینییەکان</p>
+      </div>
+
+      <!-- Print Paper Button -->
+      <div class="admin-section" style="text-align: center; background: #ecfdf5; border: 1.5px solid #a7f3d0; border-radius: 12px; padding: 14px;">
+        <h3 style="color: #065f46; justify-content: center; margin-bottom: 6px;">🖨️ ئامادەکردنی ڕاپۆرتی هەفتانە بۆ هەڵواسین لەسەر دیوار</h3>
+        <p style="color: #047857; font-size: 0.85rem; margin-bottom: 12px;">پەڕەیەکی ڕێکخراوی A4 بەبێ کۆنترۆڵ و دوگمەکان بۆ چاپکردن</p>
+        <button class="btn btn-print" onclick="printWeeklyWallReport()">
+          <span>🖨️ چاپکردنی ڕاپۆرتەکە (Print Paper)</span>
+        </button>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="admin-nav-tabs">
+        <button class="tab-btn active" id="tab-staff-btn" onclick="switchAdminTab('staff')">کارمەندەکان (Staff)</button>
+        <button class="tab-btn" id="tab-rooms-btn" onclick="switchAdminTab('rooms')">ژوورەکان و ئەستێرەی سوور (Rooms)</button>
+      </div>
+
+      <!-- TAB 1: STAFF MANAGEMENT -->
+      <div id="tab-staff-content">
+        <!-- Add / Edit Staff Form -->
+        <div class="admin-section">
+          <h3 id="staff-form-title">👤 زیادکردنی کارمەندی نوێ</h3>
+          <form id="staff-form" onsubmit="handleStaffSubmit(event)">
+            <input type="hidden" id="staff-edit-id" value="">
+
+            <div class="form-group">
+              <label>ناوی کارمەند:</label>
+              <input type="text" id="staff-name-input" class="form-control" placeholder="وەک: Chiman, Ahmed..." required>
+            </div>
+
+            <div class="form-group">
+              <label>ژوور / هۆبە:</label>
+              <select id="staff-room-select" class="form-control" required></select>
+            </div>
+
+            <div class="form-group">
+              <label>ژمارەی ئەستێرە زەردەکان:</label>
+              <select id="staff-stars-select" class="form-control">
+                <option value="5">★★★★★ (5 ئەستێرە - نایاب)</option>
+                <option value="4">★★★★☆ (4 ئەستێرە - زۆر باش)</option>
+                <option value="3">★★★☆☆ (3 ئەستێرە - باش)</option>
+                <option value="2">★★☆☆☆ (2 ئەستێرە - مامناوەند)</option>
+                <option value="1">★☆☆☆☆ (1 ئەستێرە - کەم)</option>
+                <option value="0">بێ ئەستێرە (Unranked / N.R)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>هۆکاری هەڵسەنگاندن و وەسف (Description / Why ranked or unranked):</label>
+              <textarea id="staff-reason-input" class="form-control" rows="3" placeholder="هۆکاری ئەم پلەبەندییە بنووسە..." required></textarea>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+              <button type="submit" id="staff-submit-btn" class="btn btn-primary" style="flex: 1;">زیادکردنی کارمەند +</button>
+              <button type="button" id="staff-cancel-edit-btn" class="btn btn-outline" style="display: none;" onclick="cancelStaffEdit()">پاشگەزبوونەوە</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Staff List Table -->
+        <div class="admin-section">
+          <h3>📋 لیستی کارمەندەکان</h3>
+          <div style="max-height: 250px; overflow-y: auto;">
+            <table class="admin-table">
+              <thead>
+                <tr style="background: #f8fafc;">
+                  <th>ناو</th>
+                  <th>ژوور</th>
+                  <th>ئەستێرە</th>
+                  <th>کردارەکان</th>
+                </tr>
+              </thead>
+              <tbody id="admin-staff-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: ROOMS MANAGEMENT -->
+      <div id="tab-rooms-content" style="display: none;">
+        <!-- Add / Edit Room Form -->
+        <div class="admin-section">
+          <h3 id="room-form-title">🚪 زیادکردنی ژووری نوێ</h3>
+          <form id="room-form" onsubmit="handleRoomSubmit(event)">
+            <input type="hidden" id="room-edit-id" value="">
+
+            <div class="form-group">
+              <label>ناوی ژوور:</label>
+              <input type="text" id="room-name-input" class="form-control" placeholder="وەک: Female room, Exercise room..." required>
+            </div>
+
+            <div class="form-group">
+              <label>شێوازی ئەستێرەی سووری ژوورەکە (Red Stars of the Room):</label>
+              <select id="room-rating-mode" class="form-control">
+                <option value="auto">⚡ خۆکار (Auto - تێکڕای ئەستێرەکانی کارمەندانی ئەم ژوورە)</option>
+                <option value="5">★★★★★ (دەستی: 5 ئەستێرەی سوور)</option>
+                <option value="4">★★★★☆ (دەستی: 4 ئەستێرەی سوور)</option>
+                <option value="3">★★★☆☆ (دەستی: 3 ئەستێرەی سوور)</option>
+                <option value="2">★★☆☆☆ (دەستی: 2 ئەستێرەی سوور)</option>
+                <option value="1">★☆☆☆☆ (دەستی: 1 ئەستێرەی سوور)</option>
+                <option value="NR">N.R (بێ هەڵسەنگاندن / No Rating)</option>
+              </select>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+              <button type="submit" id="room-submit-btn" class="btn btn-primary" style="flex: 1;">زیادکردنی ژوور +</button>
+              <button type="button" id="room-cancel-edit-btn" class="btn btn-outline" style="display: none;" onclick="cancelRoomEdit()">پاشگەزبوونەوە</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Rooms List Table -->
+        <div class="admin-section">
+          <h3>📋 ژوورەکانی ئێستا</h3>
+          <div style="max-height: 250px; overflow-y: auto;">
+            <table class="admin-table">
+              <thead>
+                <tr style="background: #f8fafc;">
+                  <th>ناوی ژوور</th>
+                  <th>ئەستێرەی سوور</th>
+                  <th>کردارەکان</th>
+                </tr>
+              </thead>
+              <tbody id="admin-rooms-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Factory Reset -->
+      <div style="text-align: center; margin-top: 15px;">
+        <button class="btn btn-outline" style="color: #ef4444; border-color: #fca5a5;" onclick="resetToDefaultData()">
+          ⚠️ گەڕاندنەوەی سەرجەم داتاکان بۆ باری سەرەتایی کارگە
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // System PIN Code
+    const CORRECT_PIN = "rawand2020";
+
+    // Initial Data
+    const DEFAULT_DATA = {
+      title: "Physiotime Star system",
+      rooms: [
+        { id: "room_1", name: "Female room:", ratingMode: "5" },
+        { id: "room_2", name: "Reception room:", ratingMode: "5" },
+        { id: "room_3", name: "Male room:", ratingMode: "NR" },
+        { id: "room_4", name: "Exercise room:", ratingMode: "5" }
+      ],
+      staff: [
+        { id: 1, name: "Chiman", room: "Female room:", stars: 5, reason: "ئاستی پابەندبوون و چالاکی لە ژووری ئافرەتان زۆر بەرزە و چارەسەری نەخۆشەکان زۆر بە سەرکەوتوویی بەڕێوەدەبات." },
+        { id: 2, name: "Isra", room: "Female room:", stars: 5, reason: "ڕەفتاری نموونەیی لەگەڵ نەخۆشەکان و خزمەتگوزاری بێ کەم و کوڕی لە تەواوی هەفتەکەدا." },
+        { id: 3, name: "Yusra", room: "Female room:", stars: 5, reason: "پابەندبوون بە کاتی دیاریکراو و بەردەوامی لەسەر بەرز ڕاگرتنی کوالیتی چارەسەری." },
+        { id: 4, name: "Sayran", room: "Female room:", stars: 5, reason: "چالاکیی بەرچاو و پلانە تایبەتەکانی بۆ باشترکردنی دۆخی تەندروستی نەخۆشەکان." },
+        { id: 5, name: "Asha", room: "Female room:", stars: 5, reason: "هەوڵ و ماندووبوونی بەردەوام و پێشوازی گەرم لە نەخۆشە نوێیەکان." },
+        { id: 6, name: "Rayan", room: "Reception room:", stars: 5, reason: "ڕێکخستنی کاتەکان بە شێوەیەکی زۆر ورد و مامەڵەی زۆر بەڕێزانە لەگەڵ سەردانکەران." },
+        { id: 7, name: "Malak", room: "Reception room:", stars: 5, reason: "وەڵامدانەوەی خێرا و کارامەیی لە بەڕێوەبردنی پەیوەندی و تۆمارکردنی کارەکان." },
+        { id: 8, name: "Arwa", room: "Exercise room:", stars: 5, reason: "ڕاهێنانی پیشەییانەی نەخۆشەکان و چاودێری ورد لە هۆڵی ڕاهێنان کە بووەتە هۆی پێشکەوتنی بەرچاو." }
+      ],
+      rules: [
+        "- Leader of team will take care about this list.",
+        "- Yellow Star for Center Staff, showing internal activity levels and patient improvement outcomes.",
+        "- The red star reflects room performance ratings (calculated as the average of the staff's yellow stars), accessible to management via the system 24/7.",
+        "- If staff have any problem with his/her stars, can talk with leader of team."
+      ],
+      history: [
+        {
+          id: 1,
+          date: "2026-11-06 20:00",
+          staffName: "Chiman",
+          room: "Female room:",
+          oldStars: 4,
+          newStars: 5,
+          reason: "زیادکردنی ئەستێرە بەهۆی دەرئەنجامی نایابی چارەسەری نەخۆشەکان و پابەندبوونی تەواو بە کات."
+        },
+        {
+          id: 2,
+          date: "2026-11-06 21:30",
+          staffName: "Malak",
+          room: "Reception room:",
+          oldStars: 4,
+          newStars: 5,
+          reason: "ڕێکخستنی نموونەیی نۆرەی نەخۆشەکان و وەڵامدانەوەی خێرای پەیوەندییەکان."
+        }
+      ]
+    };
+
+    // Load from LocalStorage
+    let state = JSON.parse(localStorage.getItem("physiotime_data_v3")) || DEFAULT_DATA;
+    if (!state.history) state.history = [];
+
+    function saveData() {
+      localStorage.setItem("physiotime_data_v3", JSON.stringify(state));
+      renderBoard();
+    }
+
+    // ====== PIN Authentication ======
+    function verifyPin() {
+      const input = document.getElementById("pin-input").value;
+      const error = document.getElementById("pin-error");
+      
+      if (input === CORRECT_PIN) {
+        document.getElementById("lock-screen").style.display = "none";
+        sessionStorage.setItem("site_unlocked", "true");
+        error.style.display = "none";
+      } else {
+        error.style.display = "block";
+        document.getElementById("pin-input").value = "";
+      }
+    }
+
+    document.getElementById("pin-input").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") verifyPin();
+    });
+
+    function lockWebsite() {
+      sessionStorage.removeItem("site_unlocked");
+      document.getElementById("lock-screen").style.display = "flex";
+      document.getElementById("pin-input").value = "";
+    }
+
+    if (sessionStorage.getItem("site_unlocked") === "true") {
+      document.getElementById("lock-screen").style.display = "none";
+    }
+
+    // ====== Formatting Helpers ======
+    function formatStarsString(count) {
+      if (count === 0 || count === "NR") return "بێ ئەستێرە (N.R)";
+      let s = "";
+      for (let i = 0; i < 5; i++) {
+        s += i < count ? "★" : "☆";
+      }
+      return `${s} (${count})`;
+    }
+
+    function getCurrentDateTime() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
+    }
+
+    // ====== Calculate & Render Board ======
+    function getRoomStarsHtml(room, roomStaff) {
+      if (room.ratingMode === "NR") {
+        return `<span class="no-rating">N.R</span>`;
+      }
+      if (room.ratingMode && room.ratingMode !== "auto") {
+        const starsNum = parseInt(room.ratingMode, 10);
+        let s = "";
+        for (let i = 0; i < 5; i++) {
+          s += i < starsNum ? "★" : "☆";
+        }
+        return `<div class="stars-display"><span class="star-red">${s}</span></div>`;
+      }
+
+      // Auto mode
+      if (roomStaff.length === 0) {
+        return `<span class="no-rating">N.R</span>`;
+      }
+      const total = roomStaff.reduce((acc, curr) => acc + (Number(curr.stars) || 0), 0);
+      const avg = Math.round(total / roomStaff.length);
+      if (avg === 0) {
+        return `<span class="no-rating">N.R</span>`;
+      }
+      let s = "";
+      for (let i = 0; i < 5; i++) {
+        s += i < avg ? "★" : "☆";
+      }
+      return `<div class="stars-display"><span class="star-red">${s}</span></div>`;
+    }
+
+    function renderBoard() {
+      document.getElementById("site-title-text").innerText = state.title;
+      const roomsContainer = document.getElementById("rooms-container");
+      roomsContainer.innerHTML = "";
+
+      state.rooms.forEach(room => {
+        const roomStaff = state.staff.filter(s => s.room === room.name);
+        const roomStarsHtml = getRoomStarsHtml(room, roomStaff);
+
+        const roomEl = document.createElement("div");
+        roomEl.className = "room-block";
+        roomEl.innerHTML = `
+          <div class="room-header">
+            <span class="room-name">${room.name}</span>
+            <div>${roomStarsHtml}</div>
+          </div>
+          <div class="staff-list" id="staff-list-${room.id}"></div>
+        `;
+
+        roomsContainer.appendChild(roomEl);
+        const staffListEl = roomEl.querySelector(`#staff-list-${room.id}`);
+
+        roomStaff.forEach(staffMember => {
+          let staffStarsString = "";
+          for (let i = 0; i < 5; i++) {
+            staffStarsString += i < staffMember.stars ? "★" : "☆";
+          }
+
+          const staffRow = document.createElement("div");
+          staffRow.className = "staff-row";
+          staffRow.onclick = () => openStaffModal(staffMember);
+
+          staffRow.innerHTML = `
+            <div class="staff-info-left">
+              <div class="staff-avatar">${staffMember.name.charAt(0).toUpperCase()}</div>
+              <div class="staff-name">${staffMember.name}:</div>
+            </div>
+            <div class="stars-display">
+              <span class="star-yellow">${staffStarsString}</span>
+            </div>
+          `;
+
+          staffListEl.appendChild(staffRow);
+        });
+      });
+
+      // Rules render
+      const rulesContainer = document.getElementById("rules-list-container");
+      rulesContainer.innerHTML = "";
+      state.rules.forEach(rule => {
+        const li = document.createElement("li");
+        li.innerText = rule;
+        rulesContainer.appendChild(li);
+      });
+    }
+
+    // ====== Active Staff Being Inspected ======
+    let currentInspectedStaffId = null;
+    let pendingNewStars = null;
+
+    function openStaffModal(staff) {
+      currentInspectedStaffId = staff.id;
+      document.getElementById("modal-staff-avatar").innerText = staff.name.charAt(0).toUpperCase();
+      document.getElementById("modal-staff-name").innerText = staff.name;
+      
+      let starsString = "";
+      for (let i = 0; i < 5; i++) {
+        starsString += i < staff.stars ? "★" : "☆";
+      }
+      document.getElementById("modal-staff-stars").innerText = staff.stars === 0 ? "بێ ئەستێرە (N.R)" : starsString;
+      document.getElementById("modal-staff-room").innerText = staff.room;
+      document.getElementById("modal-staff-reason").innerText = staff.reason || "هیچ هۆکار یان تێبینییەک تۆمار نەکراوە.";
+
+      document.getElementById("staff-modal").classList.add("active");
+    }
+
+    // ====== Prompt for Reason when changing stars ======
+    function triggerStarChangePrompt(newStars) {
+      const staff = state.staff.find(s => s.id === currentInspectedStaffId);
+      if (!staff) return;
+
+      if (staff.stars === newStars) {
+        alert("ئەم کارمەندە پێشتر خاوەنی هەمان ئەم ژمارە ئەستێرانەیە!");
+        return;
+      }
+
+      pendingNewStars = newStars;
+
+      // Populate prompt preview
+      document.getElementById("prompt-old-stars").innerText = formatStarsString(staff.stars);
+      document.getElementById("prompt-new-stars").innerText = formatStarsString(newStars);
+      document.getElementById("prompt-reason-input").value = "";
+
+      // Show prompt modal
+      document.getElementById("reason-prompt-modal").classList.add("active");
+    }
+
+    function handleConfirmStarChange(e) {
+      e.preventDefault();
+      const reason = document.getElementById("prompt-reason-input").value.trim();
+      if (!reason) return;
+
+      const staff = state.staff.find(s => s.id === currentInspectedStaffId);
+      if (!staff) return;
+
+      const oldStars = staff.stars;
+      const newStars = pendingNewStars;
+
+      // Update staff
+      staff.stars = newStars;
+      staff.reason = reason;
+
+      // Add entry to History!
+      const historyEntry = {
+        id: Date.now(),
+        date: getCurrentDateTime(),
+        staffName: staff.name,
+        room: staff.room,
+        oldStars: oldStars,
+        newStars: newStars,
+        reason: reason
+      };
+
+      state.history.unshift(historyEntry); // Newest first
+
+      saveData();
+
+      // Close prompt modal
+      closeModal("reason-prompt-modal");
+
+      // Update inspected staff modal view
+      openStaffModal(staff);
+    }
+
+    // ====== History Modal Handler ======
+    function openHistoryModal() {
+      const container = document.getElementById("history-list-container");
+      const countBadge = document.getElementById("history-count-badge");
+      container.innerHTML = "";
+
+      countBadge.innerText = `کۆی گۆڕانکارییە تۆمارکراوەکان: ${state.history.length}`;
+
+      if (state.history.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
+            <div style="font-size: 3rem; margin-bottom: 8px;">📜</div>
+            <p style="font-size: 1.1rem; font-weight: 600;">هیچ مێژوویەکی گۆڕانکاری تا ئێستا تۆمار نەکراوە</p>
+            <p style="font-size: 0.85rem;">هەر کاتێک ئەستێرەی هەر کارمەندێک کەم یان زیاد بکەیت، لێرە تۆمار دەبێت.</p>
+          </div>
+        `;
+      } else {
+        state.history.forEach(item => {
+          let badgeClass = "badge-rank-same";
+          let changeText = "";
+          
+          if (item.newStars > item.oldStars) {
+            badgeClass = "badge-rank-up";
+            changeText = `زیادکرا لە ${item.oldStars}★ ➔ بۆ ${item.newStars}★ ⬆️`;
+          } else if (item.newStars < item.oldStars) {
+            badgeClass = "badge-rank-down";
+            changeText = `کەمکرایەوە لە ${item.oldStars}★ ➔ بۆ ${item.newStars}★ ⬇️`;
+          } else {
+            changeText = `نوێکرایەوە: ${item.newStars}★`;
+          }
+
+          const card = document.createElement("div");
+          card.className = "history-item";
+          card.innerHTML = `
+            <div class="history-header">
+              <div class="history-name">
+                <span>👤 ${item.staffName}</span>
+                <span style="font-size: 0.85rem; font-weight: normal; color: #64748b;">(${item.room})</span>
+                <span class="history-badge ${badgeClass}">${changeText}</span>
+              </div>
+              <div class="history-date">📅 ${item.date}</div>
+            </div>
+            <div class="history-reason-box">
+              <strong>هۆکار (Why):</strong> ${item.reason}
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      document.getElementById("history-modal").classList.add("active");
+    }
+
+    function clearHistoryLog() {
+      if (confirm("ئایا دڵنیایت دەتەوێت هەموو مێژووی دەفتەرەکە بسڕیتەوە؟")) {
+        state.history = [];
+        saveData();
+        openHistoryModal();
+      }
+    }
+
+    // ====== Super Admin Modal ======
+    function openAdminModal() {
+      populateStaffRoomSelect();
+      renderAdminStaffTable();
+      renderAdminRoomsTable();
+      document.getElementById("admin-modal").classList.add("active");
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("active");
+    }
+
+    window.onclick = function(event) {
+      if (event.target.classList.contains("modal-overlay")) {
+        event.target.classList.remove("active");
+      }
+    };
+
+    function switchAdminTab(tab) {
+      const staffBtn = document.getElementById("tab-staff-btn");
+      const roomsBtn = document.getElementById("tab-rooms-btn");
+      const staffContent = document.getElementById("tab-staff-content");
+      const roomsContent = document.getElementById("tab-rooms-content");
+
+      if (tab === "staff") {
+        staffBtn.classList.add("active");
+        roomsBtn.classList.remove("active");
+        staffContent.style.display = "block";
+        roomsContent.style.display = "none";
+      } else {
+        roomsBtn.classList.add("active");
+        staffBtn.classList.remove("active");
+        roomsContent.style.display = "block";
+        staffContent.style.display = "none";
+      }
+    }
+
+    // ====== Staff Handlers (Admin) ======
+    function populateStaffRoomSelect(selectedRoomName = "") {
+      const roomSelect = document.getElementById("staff-room-select");
+      roomSelect.innerHTML = "";
+      state.rooms.forEach(r => {
+        const opt = document.createElement("option");
+        opt.value = r.name;
+        opt.innerText = r.name;
+        if (r.name === selectedRoomName) opt.selected = true;
+        roomSelect.appendChild(opt);
+      });
+    }
+
+    function renderAdminStaffTable() {
+      const tbody = document.getElementById("admin-staff-tbody");
+      tbody.innerHTML = "";
+      state.staff.forEach(s => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${s.name}</strong></td>
+          <td>${s.room}</td>
+          <td style="color: var(--gold-star); font-size: 1rem;">${s.stars === 0 ? 'N.R' : '★'.repeat(s.stars)}</td>
+          <td>
+            <button class="action-btn action-edit" onclick="editStaff(${s.id})">دەستکاری</button>
+            <button class="action-btn action-del" onclick="deleteStaff(${s.id})">سڕینەوە</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function handleStaffSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById("staff-edit-id").value;
+      const name = document.getElementById("staff-name-input").value.trim();
+      const room = document.getElementById("staff-room-select").value;
+      const stars = parseInt(document.getElementById("staff-stars-select").value, 10);
+      const reason = document.getElementById("staff-reason-input").value.trim();
+
+      if (!name) return;
+
+      if (id) {
+        // Edit existing staff
+        const staffIndex = state.staff.findIndex(s => s.id == id);
+        if (staffIndex !== -1) {
+          const oldStars = state.staff[staffIndex].stars;
+          state.staff[staffIndex].name = name;
+          state.staff[staffIndex].room = room;
+          state.staff[staffIndex].stars = stars;
+          state.staff[staffIndex].reason = reason;
+
+          // If stars changed via admin, log to history as well!
+          if (oldStars !== stars) {
+            state.history.unshift({
+              id: Date.now(),
+              date: getCurrentDateTime(),
+              staffName: name,
+              room: room,
+              oldStars: oldStars,
+              newStars: stars,
+              reason: `[لە Admin] ${reason}`
+            });
+          }
+        }
+      } else {
+        // Add new staff
+        state.staff.push({
+          id: Date.now(),
+          name,
+          room,
+          stars,
+          reason
+        });
+
+        // Log new staff addition to history
+        state.history.unshift({
+          id: Date.now(),
+          date: getCurrentDateTime(),
+          staffName: name,
+          room: room,
+          oldStars: 0,
+          newStars: stars,
+          reason: `تۆمارکردنی سەرەتایی کارمەند: ${reason}`
+        });
+      }
+
+      saveData();
+      cancelStaffEdit();
+      renderAdminStaffTable();
+    }
+
+    function editStaff(id) {
+      const staff = state.staff.find(s => s.id === id);
+      if (!staff) return;
+
+      document.getElementById("staff-edit-id").value = staff.id;
+      document.getElementById("staff-name-input").value = staff.name;
+      populateStaffRoomSelect(staff.room);
+      document.getElementById("staff-stars-select").value = staff.stars;
+      document.getElementById("staff-reason-input").value = staff.reason;
+
+      document.getElementById("staff-form-title").innerText = `✏️ دەستکاریکردنی: ${staff.name}`;
+      document.getElementById("staff-submit-btn").innerText = "پاشەکەوتکردنی گۆڕانکارییەکان";
+      document.getElementById("staff-cancel-edit-btn").style.display = "inline-flex";
+
+      switchAdminTab("staff");
+    }
+
+    function cancelStaffEdit() {
+      document.getElementById("staff-edit-id").value = "";
+      document.getElementById("staff-name-input").value = "";
+      document.getElementById("staff-reason-input").value = "";
+      document.getElementById("staff-stars-select").value = "5";
+      document.getElementById("staff-form-title").innerText = "👤 زیادکردنی کارمەندی نوێ";
+      document.getElementById("staff-submit-btn").innerText = "زیادکردنی کارمەند +";
+      document.getElementById("staff-cancel-edit-btn").style.display = "none";
+    }
+
+    function deleteStaff(id) {
+      if (confirm("دڵنیایت لە سڕینەوەی ئەم کارمەندە؟")) {
+        state.staff = state.staff.filter(s => s.id !== id);
+        saveData();
+        renderAdminStaffTable();
+      }
+    }
+
+    // ====== Rooms Handlers (Admin) ======
+    function renderAdminRoomsTable() {
+      const tbody = document.getElementById("admin-rooms-tbody");
+      tbody.innerHTML = "";
+      state.rooms.forEach(r => {
+        let starBadge = "";
+        if (r.ratingMode === "auto") {
+          starBadge = `<span style="color: #2563eb; font-weight: bold;">⚡ خۆکار (Auto)</span>`;
+        } else if (r.ratingMode === "NR") {
+          starBadge = `<span style="color: #ef4444; font-weight: bold;">N.R</span>`;
+        } else {
+          starBadge = `<span style="color: #ef4444; font-size: 1.1rem;">${"★".repeat(parseInt(r.ratingMode, 10))}</span>`;
+        }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${r.name}</strong></td>
+          <td>${starBadge}</td>
+          <td>
+            <button class="action-btn action-edit" onclick="editRoom('${r.id}')">دەستکاری</button>
+            <button class="action-btn action-del" onclick="deleteRoom('${r.id}')">سڕینەوە</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function handleRoomSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById("room-edit-id").value;
+      let name = document.getElementById("room-name-input").value.trim();
+      const ratingMode = document.getElementById("room-rating-mode").value;
+
+      if (!name) return;
+      if (!name.endsWith(":")) name += ":";
+
+      if (id) {
+        const roomIndex = state.rooms.findIndex(r => r.id === id);
+        if (roomIndex !== -1) {
+          const oldName = state.rooms[roomIndex].name;
+          state.rooms[roomIndex].name = name;
+          state.rooms[roomIndex].ratingMode = ratingMode;
+
+          if (oldName !== name) {
+            state.staff.forEach(s => {
+              if (s.room === oldName) s.room = name;
+            });
+          }
+        }
+      } else {
+        state.rooms.push({
+          id: "room_" + Date.now(),
+          name,
+          ratingMode
+        });
+      }
+
+      saveData();
+      cancelRoomEdit();
+      renderAdminRoomsTable();
+      populateStaffRoomSelect();
+    }
+
+    function editRoom(id) {
+      const room = state.rooms.find(r => r.id === id);
+      if (!room) return;
+
+      document.getElementById("room-edit-id").value = room.id;
+      document.getElementById("room-name-input").value = room.name;
+      document.getElementById("room-rating-mode").value = room.ratingMode || "auto";
+
+      document.getElementById("room-form-title").innerText = `✏️ دەستکاریکردنی ژووری: ${room.name}`;
+      document.getElementById("room-submit-btn").innerText = "پاشەکەوتکردنی گۆڕانکارییەکان";
+      document.getElementById("room-cancel-edit-btn").style.display = "inline-flex";
+
+      switchAdminTab("rooms");
+    }
+
+    function cancelRoomEdit() {
+      document.getElementById("room-edit-id").value = "";
+      document.getElementById("room-name-input").value = "";
+      document.getElementById("room-rating-mode").value = "auto";
+      document.getElementById("room-form-title").innerText = "🚪 زیادکردنی ژووری نوێ";
+      document.getElementById("room-submit-btn").innerText = "زیادکردنی ژوور +";
+      document.getElementById("room-cancel-edit-btn").style.display = "none";
+    }
+
+    function deleteRoom(id) {
+      const room = state.rooms.find(r => r.id === id);
+      if (!room) return;
+
+      const count = state.staff.filter(s => s.room === room.name).length;
+      let msg = `دڵنیایت لە سڕینەوەی ${room.name}؟`;
+      if (count > 0) {
+        msg += `\nئاگاداربە: ئەم ژوورە (${count}) کارمەندی تێدایە!`;
+      }
+
+      if (confirm(msg)) {
+        state.rooms = state.rooms.filter(r => r.id !== id);
+        saveData();
+        renderAdminRoomsTable();
+        populateStaffRoomSelect();
+      }
+    }
+
+    function resetToDefaultData() {
+      if (confirm("ئایا دڵنیایت دەتەوێت هەموو داتاکان بگەڕێنیتەوە بۆ باری سەرەتایی؟")) {
+        state = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        saveData();
+        closeModal("admin-modal");
+      }
+    }
+
+    function printWeeklyWallReport() {
+      closeModal("admin-modal");
+      setTimeout(() => {
+        window.print();
+      }, 300);
+    }
+
+    // Initialize
+    renderBoard();
+  </script>
+</body>
+</html>
